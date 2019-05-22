@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8.3)
-project(wpb_home_behaviors)
+project(Team_203)
 
 ## Compile as C++11, supported in ROS Kinetic and newer
 # add_compile_options(-std=c++11)
@@ -220,5 +220,12 @@ add_executable(wpb_home_pass_server
 )
 add_dependencies(wpb_home_pass_server ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 target_link_libraries(wpb_home_pass_server
+  ${catkin_LIBRARIES}
+)
+add_executable(wpb_home_grab_client
+  src/wpb_home_grab_client.cpp
+)
+add_dependencies(wpb_home_grab_client ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(wpb_home_grab_client
   ${catkin_LIBRARIES}
 )

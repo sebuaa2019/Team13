@@ -383,6 +383,7 @@ void ProcCloudCB(const sensor_msgs::PointCloud2 &input)
                         if(nObjDetectCounter <= 3 || itemIndex < 0)
                         {
                             //第一帧记录最靠中间的物品
+                            itemIndex = 1
                             int nNumObj = vObj.size();
                             if(nNumObj > 0)
                             {
