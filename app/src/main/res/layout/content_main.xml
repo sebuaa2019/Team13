@@ -12,20 +12,139 @@
         android:id="@+id/t1"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginLeft="4dp"
-        android:layout_marginRight="2dp"
         android:text="Hello World!"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent" />
+        android:layout_x ="155dp"
+        android:layout_y ="479dp" />
 
     <Button
         android:id="@+id/button_slam"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginBottom="262dp"
         android:onClick="onClick"
         android:text="SLAM"
-        tools:layout_editor_absoluteX="47dp"
-        tools:layout_editor_absoluteY="100dp" />
+        android:layout_x = "10dp"
+        android:layout_y = "60dp" />
+
+
+
+    <EditText
+        android:id="@+id/addresstext"
+        android:layout_width="195dp"
+        android:layout_height="46dp"
+        android:ems="10"
+        android:inputType="text"
+        android:text="192.168.1.100:9090"
+        android:layout_x="84dp"
+        android:layout_y="7dp"
+
+        />
+
+
+    <TextView
+        android:id="@+id/textView_addr"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginStart="6dp"
+        android:layout_marginLeft="6dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="10dp"
+        android:layout_marginRight="10dp"
+        android:layout_marginBottom="357dp"
+        android:text="Address"
+        android:textSize="18sp"
+        android:layout_x = "10dp"
+        android:layout_y = "7dp"/>
+
+    <Button
+        android:id="@+id/btn_connect"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:onClick="onClickConnect"
+        android:text="Connect"
+        android:layout_x = "292dp"
+        android:layout_y = "7dp"/>
+
+    <Button
+        android:id="@+id/btn_up"
+        style="@style/Widget.AppCompat.Button"
+        android:layout_width="47dp"
+        android:layout_height="0dp"
+        android:layout_marginStart="47dp"
+        android:layout_marginLeft="47dp"
+        android:layout_marginEnd="47dp"
+        android:layout_marginRight="47dp"
+        app:layout_constraintBottom_toTopOf="@+id/btn_counterwise"
+        app:layout_constraintEnd_toEndOf="@+id/btn_right"
+        app:layout_constraintStart_toStartOf="@+id/btn_left"
+        app:layout_constraintTop_toBottomOf="@+id/button_slam" />
+
+    <Button
+        android:id="@+id/btn_right"
+        style="@style/Widget.AppCompat.Button"
+        android:layout_width="0dp"
+        android:layout_height="43dp"
+        android:layout_marginTop="43dp"
+        android:layout_marginEnd="29dp"
+        android:layout_marginRight="29dp"
+        android:layout_marginBottom="43dp"
+        app:layout_constraintBottom_toBottomOf="@+id/btn_down"
+        app:layout_constraintEnd_toStartOf="@+id/btn_counterwise"
+        app:layout_constraintStart_toEndOf="@+id/btn_left"
+        app:layout_constraintTop_toTopOf="@+id/btn_up" />
+
+    <Button
+        android:id="@+id/btn_counterwise"
+        style="@style/Widget.AppCompat.Button"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginEnd="153dp"
+        android:layout_marginRight="153dp"
+        app:layout_constraintBottom_toTopOf="@+id/btn_down"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/btn_right"
+        app:layout_constraintTop_toBottomOf="@+id/btn_up" />
+
+    <Button
+        android:id="@+id/btn_clockwise"
+        style="@style/Widget.AppCompat.Button"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginEnd="106dp"
+        android:layout_marginRight="106dp"
+        app:layout_constraintBottom_toTopOf="@+id/btn_down"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/btn_counterwise"
+        app:layout_constraintTop_toBottomOf="@+id/btn_counterwise" />
+
+    <Button
+        android:id="@+id/btn_down"
+        style="@style/Widget.AppCompat.Button"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginStart="61dp"
+        android:layout_marginLeft="61dp"
+        android:layout_marginEnd="47dp"
+        android:layout_marginRight="47dp"
+        android:layout_marginBottom="14dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/t1"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/btn_counterwise" />
+
+    <Button
+        android:id="@+id/btn_left"
+        style="@style/Widget.AppCompat.Button"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginStart="14dp"
+        android:layout_marginLeft="14dp"
+        android:layout_marginEnd="47dp"
+        android:layout_marginRight="47dp"
+        android:layout_marginBottom="57dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/btn_right"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/textView_addr" />
 
 </android.support.constraint.ConstraintLayout>
