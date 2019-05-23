@@ -19,6 +19,7 @@ import com.jilk.ros.rosapi.message.TypeDef;
 import com.jilk.ros.rosbridge.operation.Operation;
 import com.jilk.ros.rosbridge.ROSBridgeClient;
 import com.jilk.ros.rosbridge.FullMessageHandler;
+import org.java_websocket.client.*;
 
 public class MainActivity extends AppCompatActivity {
     ROSBridgeClient client;
@@ -28,21 +29,10 @@ public class MainActivity extends AppCompatActivity {
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        client = new ROSBridgeClient("ws://192.168.1.101:11311");
-        boolean connect_state = client.connect();
-        if(connect_state == false){
-            TextView t1 = (TextView)findViewById(R.id.t1);
-            if(t1!=null)
-                t1.setText("connect fail");
+        client = new ROSBridgeClient("ws://192.168.1.100:9090");
 
-        }
-        else {
-            ctrlTopic = new com.jilk.ros.Topic<RosString>("/ctrlmsg", RosString.class, client);
-            ctrlTopic.advertise();
-        }
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -51,6 +41,21 @@ public class MainActivity extends AppCompatActivity {
                         .setAction("Action", null).show();
             }
         });
+        while(true){
+            boolean connect_state = client.connect();
+            if(connect_state == false){
+                TextView t1 = (TextView)findViewById(R.id.t1);
+                if(t1!=null)
+                    t1.setText("connect fail");
+                    break;
+            }
+            else {
+                ctrlTopic = new com.jilk.ros.Topic<RosString>("/ctrlmsg", RosString.class, client);
+                ctrlTopic.advertise();
+                break;
+            }
+        }
+
     }
 
     @Override
