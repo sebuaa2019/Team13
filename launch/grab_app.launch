@@ -3,7 +3,7 @@
   <!--- Run wpb_home  -->
   <include file="$(find wpb_home_bringup)/launch/normal.launch" />
 
-  <node pkg="wpb_home_behaviors_mod" type="wpb_home_grab_server" name="wpb_home_grab_server">
+  <node pkg="team_203" type="wpb_home_grab_server_mod" name="wpb_home_grab_server_mod">
     <param name="start" type="bool" value="false"/> 
     <rosparam file="$(find wpb_home_bringup)/config/wpb_home.yaml" command="load" />
   </node>

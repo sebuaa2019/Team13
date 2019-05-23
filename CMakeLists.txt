@@ -7,11 +7,21 @@ project(team_203)
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
+
+find_package(catkin REQUIRED)
 find_package(catkin REQUIRED COMPONENTS
   roscpp
   std_msgs
   tf
+  roscpp rospy std_msgs 
+  pcl_conversions pcl_ros 
+  cv_bridge image_transport tf 
+  sensor_msgs geometry_msgs std_msgs visualization_msgs 
+  image_geometry message_generation
+  move_base_msgs actionlib 
 )
+find_package(PCL REQUIRED)
+find_package(OpenCV REQUIRED)
 
 ## System dependencies are found with CMake's conventions
 # find_package(Boost REQUIRED COMPONENTS system)
@@ -68,10 +78,10 @@ find_package(catkin REQUIRED COMPONENTS
 # )
 
 ## Generate added messages and services with any dependencies listed here
-# generate_messages(
-#   DEPENDENCIES
-#   std_msgs
-# )
+generate_messages(
+  DEPENDENCIES
+  std_msgs  # Or other packages containing msgs
+)
 
 ################################################
 ## Declare ROS dynamic reconfigure parameters ##
@@ -105,7 +115,7 @@ find_package(catkin REQUIRED COMPONENTS
 catkin_package(
 #  INCLUDE_DIRS include
 #  LIBRARIES team_203
-#  CATKIN_DEPENDS roscpp std_msgs
+ CATKIN_DEPENDS message_runtime
 #  DEPENDS system_lib
 )
 
@@ -118,9 +128,13 @@ catkin_package(
 # include_directories(include)
 include_directories(
   ${catkin_INCLUDE_DIRS}
+    include
+    ${catkin_INCLUDE_DIRS}
+    ${PCL_INCLUDE_DIRS}
   /home/robot/catkin_ws/src/team_203/include/
 )
 
+link_directories(${PCL_LIBRARY_DIRS})
 ## Declare a C++ library
 # add_library(${PROJECT_NAME}
 #   src/${PROJECT_NAME}/team_203.cpp
@@ -212,32 +226,25 @@ target_link_libraries(mainctrl
   ${catkin_LIBRARIES}
 )
 
-add_library(yaml
-  src/yaml.cpp
+add_executable(wpb_home_grab_server_mod
+  src/wpb_home_grab_server_mod.cpp
 )
-add_dependencies(yaml ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-target_link_libraries(yaml
+add_dependencies(wpb_home_grab_server_mod ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(wpb_home_grab_server_mod
   ${catkin_LIBRARIES}
 )
-#add_executable(wpb_home_grab_server
-#  src/mani_ctrl/wpb_home_behavios_mod/src/wpb_home_grab_server.cpp
-#)
-#add_dependencies(wpb_home_grab_server ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-#target_link_libraries(wpb_home_grab_server
-#  ${catkin_LIBRARIES}
-#)
 
-#add_executable(wpb_home_pass_server
-#  src/mani_ctrl/wpb_home_behavios_mod/src/wpb_home_pass_server.cpp
-#)
-#add_dependencies(wpb_home_pass_server ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-#target_link_libraries(wpb_home_pass_server
-#  ${catkin_LIBRARIES}
-#)
-#add_executable(wpb_home_grab_client
-#  src/mani_ctrl/wpb_home_behavios_mod/src/wpb_home_grab_client.cpp
-#)
-#add_dependencies(wpb_home_grab_client ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-#target_link_libraries(wpb_home_grab_client
-#  ${catkin_LIBRARIES}
-#)
+add_executable(wpb_home_pass_server_mod
+  src/wpb_home_pass_server_mod.cpp
+)
+add_dependencies(wpb_home_pass_server_mod ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(wpb_home_pass_server_mod
+  ${catkin_LIBRARIES}
+)
+add_executable(wpb_home_grab_client_mod
+  src/wpb_home_grab_client_mod.cpp
+)
+add_dependencies(wpb_home_grab_client_mod ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(wpb_home_grab_client_mod
+  ${catkin_LIBRARIES}
+)

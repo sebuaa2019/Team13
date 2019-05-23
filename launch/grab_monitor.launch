@@ -1,7 +1,7 @@
 <launch>
 
     <arg name="gui" default="true" />
-    <arg name="rvizconfig" default="$(find wpb_home_behaviors_mod)/rviz/grab.rviz" />
+    <arg name="rvizconfig" default="/hoe/robot/catkin_ws/src/team_203/rviz/grab.rviz" />
     <node name="rviz" pkg="rviz" type="rviz" args="-d $(arg rvizconfig)" required="true" />
 
 </launch>
