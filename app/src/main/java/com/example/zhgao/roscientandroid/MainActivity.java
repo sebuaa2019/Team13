@@ -35,6 +35,7 @@ public class MainActivity extends AppCompatActivity {
     RosState runstate = RosState.IDLE;
     boolean connect_state = false;
     TextView info;
+    boolean robot_stop = true;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
@@ -55,44 +56,101 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
                 int id  = v.getId();
+                Button curbtn = (Button)findViewById(id);
+                int action = event.getAction();
+                if (action == MotionEvent.ACTION_BUTTON_PRESS ||
+                        action == MotionEvent.ACTION_DOWN||
+                        action == MotionEvent.ACTION_HOVER_ENTER||
+                        action == MotionEvent.ACTION_MASK||
+                        action == MotionEvent.ACTION_POINTER_DOWN||
+                        action == MotionEvent.ACTION_MOVE) {
+                    info.setText("action_down");
+                    curbtn.setBackgroundColor(Color.parseColor("#0000CD"));
+                }
+                else{
+                    info.setText("action_up");
+                    curbtn.setBackgroundColor(Color.parseColor("#DDDDDD"));
+                }
                 // TODO Auto-generated method stub
-                if(runstate == RosState.SLAM || runstate == RosState.HOLD){
-                    int action = event.getAction();
-                    if (action == MotionEvent.ACTION_DOWN) {
-                        switch(id){
-                            case R.id.btn_up:{
-                                VelCmdTopic.publish(new GeoTwist(0.2,0,0,0,0,0));
-                                break;
+                if(VelCmdTopic!=null) {
+                    if (runstate == RosState.SLAM || runstate == RosState.HOLD) {
+
+                        if (action == MotionEvent.ACTION_BUTTON_PRESS ||
+                                action == MotionEvent.ACTION_DOWN||
+                                action == MotionEvent.ACTION_HOVER_ENTER||
+                                action == MotionEvent.ACTION_MASK||
+                                action == MotionEvent.ACTION_POINTER_DOWN||
+                                action == MotionEvent.ACTION_MOVE) {
+
+                            switch (id) {
+                                case R.id.btn_up: {
+                                    String MoveMsg = "{\"op\":\"publish\",\"topic\":\"/cmd_vel\",\"msg\":{\"linear\":{\"x\":" + 0.2 + ",\"y\":" +
+                                            0 + ",\"z\":0},\"angular\":{\"x\":0,\"y\":0,\"z\":" + 0 + "}}}";
+                                    client.send(MoveMsg);
+                                    //VelCmdTopic.publish(new GeoTwist(0.2, 0, 0, 0, 0, 0));
+                                    break;
+                                }
+                                case R.id.btn_down: {
+                                    String MoveMsg = "{\"op\":\"publish\",\"topic\":\"/cmd_vel\",\"msg\":{\"linear\":{\"x\":" + -0.2 + ",\"y\":" +
+                                            0 + ",\"z\":0},\"angular\":{\"x\":0,\"y\":0,\"z\":" + 0 + "}}}";
+                                    client.send(MoveMsg);
+                                    //VelCmdTopic.publish(new GeoTwist(-0.2, 0, 0, 0, 0, 0));
+                                    break;
+                                }
+                                case R.id.btn_left: {
+                                    String MoveMsg = "{\"op\":\"publish\",\"topic\":\"/cmd_vel\",\"msg\":{\"linear\":{\"x\":" + 0 + ",\"y\":" +
+                                            0.2 + ",\"z\":0},\"angular\":{\"x\":0,\"y\":0,\"z\":" + 0 + "}}}";
+                                    client.send(MoveMsg);
+                                    //VelCmdTopic.publish(new GeoTwist(0, 0.2, 0, 0, 0, 0));
+                                    break;
+                                }
+                                case R.id.btn_right: {
+                                    String MoveMsg = "{\"op\":\"publish\",\"topic\":\"/cmd_vel\",\"msg\":{\"linear\":{\"x\":" + 0 + ",\"y\":" +
+                                            -0.2 + ",\"z\":0},\"angular\":{\"x\":0,\"y\":0,\"z\":" + 0 + "}}}";
+                                    client.send(MoveMsg);
+                                    //VelCmdTopic.publish(new GeoTwist(0, -0.2, 0, 0, 0, 0));
+                                    break;
+                                }
+                                case R.id.btn_clockwise: {
+                                    String MoveMsg = "{\"op\":\"publish\",\"topic\":\"/cmd_vel\",\"msg\":{\"linear\":{\"x\":" + 0 + ",\"y\":" +
+                                            0 + ",\"z\":0},\"angular\":{\"x\":0,\"y\":0,\"z\":" + 0.8 + "}}}";
+                                    client.send(MoveMsg);
+                                    //VelCmdTopic.publish(new GeoTwist(0, 0, 0, 0, 0, 1.0));
+                                    break;
+                                }
+                                case R.id.btn_counterwise: {
+                                    String MoveMsg = "{\"op\":\"publish\",\"topic\":\"/cmd_vel\",\"msg\":{\"linear\":{\"x\":" + 0 + ",\"y\":" +
+                                            0 + ",\"z\":0},\"angular\":{\"x\":0,\"y\":0,\"z\":" + -0.8 + "}}}";
+                                    client.send(MoveMsg);
+                                    //VelCmdTopic.publish(new GeoTwist(0, 0, 0, 0, 0, -1.0));
+                                    break;
+                                }
                             }
-                            case R.id.btn_down:{
-                                VelCmdTopic.publish(new GeoTwist(-0.2,0,0,0,0,0));
-                                break;
+                            robot_stop = false;
+                            info.setText("sent move message");
+                        } else {
+
+                            String MoveMsg = "{\"op\":\"publish\",\"topic\":\"/cmd_vel\",\"msg\":{\"linear\":{\"x\":" + 0 + ",\"y\":" +
+                                    0 + ",\"z\":0},\"angular\":{\"x\":0,\"y\":0,\"z\":" + 0 + "}}}";
+                            for(int i=0;i<10;i++) {
+                                try {
+                                    Thread.sleep(5);
+                                }
+                                catch(Exception e){
+
+                                }
+                                client.send(MoveMsg);
                             }
-                            case R.id.btn_left:{
-                                VelCmdTopic.publish(new GeoTwist(0,0.2,0,0,0,0));
-                                break;
-                            }
-                            case R.id.btn_right:{
-                                VelCmdTopic.publish(new GeoTwist(0,-0.2,0,0,0,0));
-                                break;
-                            }
-                            case R.id.btn_clockwise:{
-                                VelCmdTopic.publish(new GeoTwist(0,0,0,0,0,1.0));
-                                break;
-                            }
-                            case R.id.btn_counterwise:{
-                                VelCmdTopic.publish(new GeoTwist(0,0,0,0,0,-1.0));
-                                break;
-                            }
+                            robot_stop = true;
+                            info.setText("sent stop message");
                         }
-                    } else if (action == MotionEvent.ACTION_UP || action == MotionEvent.ACTION_CANCEL) {
-                        VelCmdTopic.publish(new GeoTwist(0,0,0,0,0,0));
+                        return false;
+                    } else {
+
+                        return true;
                     }
-                    return false;
                 }
-                else {
-                    return true;
-                }
+                return true;
             }
         };
         btn_up.setOnTouchListener(buttonListener);
@@ -143,7 +201,11 @@ public class MainActivity extends AppCompatActivity {
             info.setText("Not Connected");
             return;
         }
-        VelCmdTopic.publish(new GeoTwist(0,0,0,0,0,0));
+        String MoveMsg = "{\"op\":\"publish\",\"topic\":\"/cmd_vel\",\"msg\":{\"linear\":{\"x\":" + 0 + ",\"y\":" +
+                0 + ",\"z\":0},\"angular\":{\"x\":0,\"y\":0,\"z\":" + 0 + "}}}";
+        robot_stop = true;
+        client.send(MoveMsg);
+        info.setText("sent stop msg ");
         int id = v.getId();
         RosString ctrlstring = new RosString("NULL");
         Button curbtn = (Button) findViewById(id);
@@ -152,8 +214,17 @@ public class MainActivity extends AppCompatActivity {
             if(runstate != RosState.IDLE){
                 if(runstate == RosState.SLAM){
                     ctrlstring = new RosString("stop slam");
-                    ctrlTopic.publish(ctrlstring);
                 }
+                if(runstate == RosState.HOLD){
+                    ctrlstring = new RosString("stop hold");
+                }
+                if(runstate == RosState.NAV){
+                    ctrlstring = new RosString("stop nav");
+                }
+                if(runstate == RosState.GRAB){
+                    ctrlstring = new RosString("stop grab");
+                }
+                ctrlTopic.publish(ctrlstring);
                 statebtn.setBackgroundColor(Color.parseColor("#FFEC8B"));
             }
             if(runstate == getButtonActType(id)){
@@ -167,6 +238,21 @@ public class MainActivity extends AppCompatActivity {
                     runstate = RosState.SLAM;
 
                 }
+                if(id==R.id.btn_nav){
+                    ctrlstring = new RosString("start nav");
+                    ctrlTopic.publish(ctrlstring);
+                    runstate = RosState.NAV;
+                }
+                if(id==R.id.btn_hold){
+                    ctrlstring = new RosString("start hold");
+                    ctrlTopic.publish(ctrlstring);
+                    runstate = RosState.HOLD;
+                }
+                if(id==R.id.btn_grab){
+                    ctrlstring = new RosString("start grab");
+                    ctrlTopic.publish(ctrlstring);
+                    runstate = RosState.GRAB;
+                }
                 curbtn.setBackgroundColor(Color.parseColor("#0000CD"));
                 info.setText("successfully sent:"+ctrlstring.data);
             }
@@ -176,12 +262,16 @@ public class MainActivity extends AppCompatActivity {
 
         }
     }
+    SendZeroThread sendzero = null;
     public void onClickConnect(View v){
         EditText remoteaddr = (EditText)findViewById(R.id.addresstext);
-        client = new ROSBridgeClient("ws://" + remoteaddr.toString());
-        boolean connect_state = client.connect();
+
+
+        String fulladdr = "ws://" + remoteaddr.getText() + ":9090";
+        client = new ROSBridgeClient(fulladdr);
+        connect_state = client.connect();
         if(connect_state == false){
-            info.setText("Connect Fail");
+            info.setText("Connect Fail to "+fulladdr);
         }
         else{
             info.setText("Connected");
@@ -189,11 +279,38 @@ public class MainActivity extends AppCompatActivity {
             ctrlTopic.advertise();
             VelCmdTopic = new com.jilk.ros.Topic<GeoTwist>("/cmd_vel",GeoTwist.class,client);
             VelCmdTopic.advertise();
+            if(sendzero == null) {
+                sendzero = new SendZeroThread();
+                sendzero.start();
+            }
         }
     }
     public void onClickMove(View v,MotionEvent event){
 
     }
 
+    class SendZeroThread extends Thread{
+        public void run(){
+            while(true){
+                try{
+                    if(client== null){
+                        continue;
+                    }
+                    if(VelCmdTopic == null){
+                        continue;
+                    }
+                    if(robot_stop){
+                        String MoveMsg = "{\"op\":\"publish\",\"topic\":\"/cmd_vel\",\"msg\":{\"linear\":{\"x\":" + 0 + ",\"y\":" +
+                                0 + ",\"z\":0},\"angular\":{\"x\":0,\"y\":0,\"z\":" + 0 + "}}}";
+                        client.send(MoveMsg);
+                    }
+                    Thread.sleep(10);
+                }
+                catch(Exception e){
 
+                }
+            }
+        }
+
+    }
 }
