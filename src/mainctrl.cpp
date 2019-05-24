@@ -5,6 +5,7 @@
 #include <string.h>
 #include <iostream>
 #include <fstream>
+#include <semaphore.h>
 #include <tf/transform_listener.h>
 #include <geometry_msgs/PoseStamped.h>
 #include <yaml-cpp/yaml.h>
@@ -12,7 +13,7 @@
 #ifndef MAP_FILE_NAME
 #define MAP_FILE_NAME "/home/robot/map.yaml"
 #endif
-
+sem_t callback_lock;
 namespace yaml_save{
     struct Vec3 { 
 		double x, y, yaw; 
@@ -89,6 +90,7 @@ double x_map,y_map,yaw_map;
  */
 void chatterCallback(const std_msgs::String::ConstPtr& msg)//是一个回调函数，当接收到 chatter 话题的时候就会被调用。
 {
+	sem_wait(&callback_lock);
   const char* cstr_msg = msg->data.c_str();
   ROS_INFO("I heard: [%s]", cstr_msg);
 	if(CURSTATE == MAINSTATE_IDLE){
@@ -96,6 +98,7 @@ void chatterCallback(const std_msgs::String::ConstPtr& msg)//是一个回调函�
 			system("nohup roslaunch team_203 gmapping.launch &");
 			ROS_INFO("SWITCH TO SLAM MODE");
 			CURSTATE = MAINSTATE_SLAM;
+			ros::Duration(1.0).sleep();
 		}
 	}
 	else if(CURSTATE == MAINSTATE_SLAM){
@@ -105,12 +108,17 @@ void chatterCallback(const std_msgs::String::ConstPtr& msg)//是一个回调函�
 			system("rosnode kill wpb_home_joy");
 			system("rosnode kill teleop");
 			system("rosnode kill rviz");
+			system("rosnode kill rplidarNode");
 			yaml_save::Vec3 v(x_map,y_map,yaw_map);
 			yaml_save::add_last_origin(MAP_FILE_NAME,v);
+			CURSTATE = MAINSTATE_IDLE;
+			ros::Duration(1.0).sleep();
+			ROS_INFO("stop slam");
 		}else{
 			ROS_INFO("invalid command in MAINSTATE_SLAM %s",cstr_msg);
 		}
 	}
+	sem_post(&callback_lock);
 	
 }
 
@@ -126,6 +134,7 @@ int main(int argc, char **argv)
    * You must call one of the versions of ros::init() before using any other
    * part of the ROS system.
    */
+   sem_init(&callback_lock,0,1);
   ros::init(argc, argv, "listener");
   CURSTATE=MAINSTATE_IDLE;
   NEXTACTION=ACT_NULL;
