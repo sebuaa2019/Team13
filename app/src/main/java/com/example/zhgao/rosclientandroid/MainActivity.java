@@ -1,9 +1,7 @@
-package com.example.zhgao.roscientandroid;
+package com.example.zhgao.rosclientandroid;
 
 import android.graphics.Color;
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.MotionEvent;
@@ -14,18 +12,10 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
-import com.jilk.ros.message.Clock;
 import com.jilk.ros.message.GeoTwist;
-import com.jilk.ros.message.Message;
-import com.jilk.ros.message.MessageType;
 import com.jilk.ros.message.RosString;
 //import com.jilk.ros.message.RosString;
-import com.jilk.ros.rosapi.message.TypeDef;
-import com.jilk.ros.rosbridge.operation.Operation;
 import com.jilk.ros.rosbridge.ROSBridgeClient;
-import com.jilk.ros.rosbridge.FullMessageHandler;
-import org.java_websocket.client.*;
-
 
 
 public class MainActivity extends AppCompatActivity {
@@ -33,6 +23,7 @@ public class MainActivity extends AppCompatActivity {
     com.jilk.ros.Topic<RosString> ctrlTopic = null;
     com.jilk.ros.Topic<GeoTwist> VelCmdTopic = null;
     RosState runstate = RosState.IDLE;
+    String RemoteIP = null;
     boolean connect_state = false;
     TextView info;
     boolean robot_stop = true;
@@ -241,6 +232,10 @@ public class MainActivity extends AppCompatActivity {
                 if(id==R.id.btn_nav){
                     ctrlstring = new RosString("start nav");
                     ctrlTopic.publish(ctrlstring);
+                    MyImageView imageview = (MyImageView)findViewById(R.id.image_view);
+                    imageview.setVisibility(View.VISIBLE);
+                    imageview.setImageURL("ftp://robot:6@"+RemoteIP+"/home/robot/map.png");
+
                     runstate = RosState.NAV;
                 }
                 if(id==R.id.btn_hold){
@@ -265,9 +260,9 @@ public class MainActivity extends AppCompatActivity {
     SendZeroThread sendzero = null;
     public void onClickConnect(View v){
         EditText remoteaddr = (EditText)findViewById(R.id.addresstext);
+        RemoteIP = remoteaddr.getText().toString();
 
-
-        String fulladdr = "ws://" + remoteaddr.getText() + ":9090";
+        String fulladdr = "ws://" + RemoteIP + ":9090";
         client = new ROSBridgeClient(fulladdr);
         connect_state = client.connect();
         if(connect_state == false){

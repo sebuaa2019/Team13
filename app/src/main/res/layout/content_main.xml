@@ -140,4 +140,11 @@
         tools:layout_editor_absoluteX="264dp"
         tools:layout_editor_absoluteY="53dp" />
 
+    <com.example.zhgao.rosclientandroid.MyImageView
+        android:id="@+id/image_view"
+        android:layout_width="340dp"
+        android:layout_height="211dp"
+        android:layout_x="10dp"
+        android:layout_y="121dp"
+        android:visibility="gone" />
 </AbsoluteLayout>

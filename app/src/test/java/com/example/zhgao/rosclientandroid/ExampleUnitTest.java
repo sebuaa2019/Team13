@@ -1,4 +1,4 @@
-package com.example.zhgao.roscientandroid;
+package com.example.zhgao.rosclientandroid;
 
 import org.junit.Test;
 

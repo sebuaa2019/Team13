@@ -1,4 +1,4 @@
-package com.example.zhgao.roscientandroid;
+package com.example.zhgao.rosclientandroid;
 
 import android.content.Context;
 import android.support.test.InstrumentationRegistry;
@@ -21,6 +21,6 @@ public class ExampleInstrumentedTest {
         // Context of the app under test.
         Context appContext = InstrumentationRegistry.getTargetContext();
 
-        assertEquals("com.example.zhgao.roscientandroid", appContext.getPackageName());
+        assertEquals("com.example.zhgao.rosclientandroid", appContext.getPackageName());
     }
 }

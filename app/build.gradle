@@ -3,7 +3,7 @@ apply plugin: 'com.android.application'
 android {
     compileSdkVersion 28
     defaultConfig {
-        applicationId "com.example.zhgao.roscientandroid"
+        applicationId "com.example.zhgao.rosclientandroid"
         minSdkVersion 15
         targetSdkVersion 28
         versionCode 1
