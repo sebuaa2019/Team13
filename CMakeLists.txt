@@ -229,3 +229,10 @@ add_dependencies(wpb_home_grab_client ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catk
 target_link_libraries(wpb_home_grab_client
   ${catkin_LIBRARIES}
 )
+add_executable(EmergencyStop
+  src/EmergencyStop.cpp
+)
+add_dependencies(EmergencyStop ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(EmergencyStop
+  ${catkin_LIBRARIES}
+)
