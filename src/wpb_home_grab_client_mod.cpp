@@ -46,7 +46,7 @@ void GrabResultCB(const std_msgs::String::ConstPtr &msg)
 
 int main(int argc, char** argv)
 {
-    ros::init(argc, argv, "wpb_home_grab_client");  //程序初始化
+    ros::init(argc, argv, "wpb_home_grab_client_mod");  //程序初始化
 
     ros::NodeHandle n;
     behaviors_pub = n.advertise<std_msgs::String>("/wpb_home/behaviors", 30);
