@@ -9,6 +9,8 @@
 #include <tf/transform_listener.h>
 #include <geometry_msgs/PoseStamped.h>
 #include <yaml-cpp/yaml.h>
+#include <move_base_msgs/MoveBaseAction.h>
+#include <actionlib/client/simple_action_client.h>
 //#include "Quaternion.h"
 #ifndef MAP_FILE_NAME
 #define MAP_FILE_NAME "/home/robot/map.yaml"
@@ -84,6 +86,7 @@ enum MAINACTION{
 };
 MAINSTATE CURSTATE;
 MAINACTION NEXTACTION;
+MoveBaseClient moveBaseClient;
 double x_map,y_map,yaw_map;
 /**
  * This tutorial demonstrates simple receipt of messages over the ROS system.
@@ -100,22 +103,80 @@ void chatterCallback(const std_msgs::String::ConstPtr& msg)//是一个回调函�
 			CURSTATE = MAINSTATE_SLAM;
 			ros::Duration(1.0).sleep();
 		}
+		if(msg->data == "start nav origin"){
+			yaml_save::use_origin(MAP_FILE_NAME,"origin_origin");
+			system("nohup roslaunch team_203 nav.launch &");
+			moveBaseClient = MoveBaseClient("move_base", true);
+			while(!ac.waitForServer(ros::Duration(5.0))){
+				ROS_INFO("Waiting for the move_base action server to come up");
+			}
+		}
+		if(msg->data == "start nav last"){
+			yaml_save::use_origin(MAP_FILE_NAME,"last_origin");
+			system("nohup roslaunch team_203 nav.launch &");
+			moveBaseClient = MoveBaseClient("move_base", true);
+			while(!ac.waitForServer(ros::Duration(5.0))){
+				ROS_INFO("Waiting for the move_base action server to come up");
+			}
+		}
+		if(msg->data == "start grab"){
+			
+		}
 	}
 	else if(CURSTATE == MAINSTATE_SLAM){
 		if(msg->data == "stop slam"){
+			yaml_save::Vec3 v(x_map,y_map,yaw_map);
+			yaml_save::add_last_origin(MAP_FILE_NAME,v);
+			ROS_INFO("curent x,y: %f %f",(float)x_map,(float)y_map);
 			system("rosrun map_server map_saver -f map");
 			system("rosnode kill slam_gmapping");
 			system("rosnode kill wpb_home_joy");
 			system("rosnode kill teleop");
 			system("rosnode kill rviz");
 			system("rosnode kill rplidarNode");
-			yaml_save::Vec3 v(x_map,y_map,yaw_map);
-			yaml_save::add_last_origin(MAP_FILE_NAME,v);
 			CURSTATE = MAINSTATE_IDLE;
 			ros::Duration(1.0).sleep();
 			ROS_INFO("stop slam");
 		}else{
 			ROS_INFO("invalid command in MAINSTATE_SLAM %s",cstr_msg);
+		}
+	}
+	else if(CURSTATE == MAINSTATE_NAV){
+		if(msg->data == "stop nav"){
+			yaml_save::Vec3 v(x_map,y_map,yaw_map);
+			yaml_save::add_last_origin(MAP_FILE_NAME,v);
+			system("rosnode kill rviz");
+			system("rosnode kill map_server");
+			system("rosnode kill rplidarNode");
+			system("rosnode kill move_base");
+			system("rosnode kill amcl");
+			CURSTATE = MAINSTATE_IDLE;
+			ROS_INFO("stop nav");
+			
+		}
+		else{
+			float xmove,ymove;
+			int ret = sscanf(msg->data.c_str(),"movebase %f %f",&x,&y);
+			if(ret == 2){
+				  move_base_msgs::MoveBaseGoal goal;
+  //we'll send a goal to the robot to move 1 meter forward
+				  goal.target_pose.header.frame_id = "map";
+				  goal.target_pose.header.stamp = ros::Time::now();
+				  goal.target_pose.pose.position.x = xmove;
+				  goal.target_pose.pose.position.y = ymove;
+				  goal.target_pose.pose.orientation.w = 1.0;
+				  ROS_INFO("Sending goal");
+				  moveBaseClient.sendGoal(goal);
+				  moveBaseClient.waitForResult();
+
+				  if(ac.getState() == actionlib::SimpleClientGoalState::SUCCEEDED)
+					ROS_INFO("Hooray, the base moved 1 meter forward");
+				  else
+					ROS_INFO("The base failed to move forward 1 meter for some reason");
+			}
+			else{
+				ROS_INFO("invalid command in MAINSTATE_NAV %s",cstr_msg);
+			}
 		}
 	}
 	sem_post(&callback_lock);
