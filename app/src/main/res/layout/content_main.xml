@@ -147,4 +147,13 @@
         android:layout_x="10dp"
         android:layout_y="121dp"
         android:visibility="gone" />
+
+    <WebView
+        android:id="@+id/webView"
+        android:layout_width="340dp"
+        android:layout_height="211dp"
+        android:layout_x="10dp"
+        android:layout_y="121dp"
+        android:visibility="gone" />
+
 </AbsoluteLayout>

@@ -14,6 +14,7 @@ import java.net.URL;
 import java.net.URLConnection;
 
 public class MyImageView extends android.support.v7.widget.AppCompatImageView {
+
     public static final int GET_DATA_SUCCESS = 1;
     public static final int NETWORK_ERROR = 2;
     public static final int SERVER_ERROR = 3;
