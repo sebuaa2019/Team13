@@ -141,6 +141,8 @@ void chatterCallback(const std_msgs::String::ConstPtr &msg) //是一个回调函
 	}
 	if (msg->data == "start grab")
 	{
+		system("nohup roslaunch team_203 grab_demo_mod.launch &");
+		CURSTATE = MAINSTATE_GRAB;
 	}
     }
     else if (CURSTATE == MAINSTATE_SLAM)
@@ -229,6 +231,11 @@ void chatterCallback(const std_msgs::String::ConstPtr &msg) //是一个回调函
 	    }
 	}
     }
+	else if(CURSTATE == MAINSTATE_GRAB){
+		if(msg->data == "stop grab"){
+			
+		}
+	}
     sem_post(&callback_lock);
 }
 
