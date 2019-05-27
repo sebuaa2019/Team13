@@ -1,0 +1,5 @@
+<launch>
+ <include file="$(find rosbridge_server)/launch/rosbridge_websocket.launch" />
+ <include file="$(find team_203)/launch/grap_app.launch" />
+ <include file="$(find team_203)/launch/video.launch" />
+</launch>
