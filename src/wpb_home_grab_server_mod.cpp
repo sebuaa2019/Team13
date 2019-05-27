@@ -64,6 +64,7 @@
 #include <std_msgs/String.h>
 #include <sound_play/SoundRequest.h>
 #include <geometry_msgs/Pose2D.h>
+#include <semaphore.h>
 #include "highgui.h"
 #include <stdlib.h>
 #include <stdio.h>
@@ -384,7 +385,12 @@ void ProcCloudCB(const sensor_msgs::PointCloud2 &input)
                         if(nObjDetectCounter <= 3 || itemIndex < 0)
                         {
                             //第一帧记录最靠中间的物品
-                            itemIndex = 0;
+                            while(true){
+								if(itemIndex >= 0){
+									break;
+								}
+								ros::Duration(1.0).sleep();
+							}
                             int nNumObj = vObj.size();
                             if(nNumObj > 0)
                             {
@@ -773,9 +779,17 @@ void BehaviorCB(const std_msgs::String::ConstPtr &msg)
     }
 
 }
-
+void ItemCallback(const std_msgs::String::ConstPtr &msg){
+	sem_wait(&callback_lock);
+	int recv_index;
+	int ret = sscanf(msg->data.c_str(),"itemindex %d",&recv_index);
+	if(ret == 1)
+		itemIndex = recv_index;
+	sem_post(&callback_lock);
+}
 int main(int argc, char **argv)
 {
+	sem_init(&callback_lock, 0, 1);
     ros::init(argc, argv, "wpb_home_grab_server_mod");
     ROS_INFO("wpb_home_grab_server");
     tf_listener = new tf::TransformListener(); 
@@ -798,7 +812,7 @@ int main(int argc, char **argv)
     ros::Subscriber sub_sr = nh.subscribe("/wpb_home/behaviors", 30, BehaviorCB);
     ctrl_pub = nh.advertise<std_msgs::String>("/wpb_home/ctrl", 30);
     ros::Subscriber pose_diff_sub = nh.subscribe("/wpb_home/pose_diff", 1, PoseDiffCallback);
-
+	ros::Subscriber sub = n.subscribe("/itemmsg", 1000, ItemCallback);
     mani_ctrl_msg.name.resize(2);
     mani_ctrl_msg.position.resize(2);
     mani_ctrl_msg.velocity.resize(2);
