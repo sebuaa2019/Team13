@@ -30,6 +30,7 @@ import com.jilk.ros.rosbridge.ROSBridgeClient;
 public class MainActivity extends AppCompatActivity {
     ROSBridgeClient client = null;
     com.jilk.ros.Topic<RosString> ctrlTopic = null;
+    com.jilk.ros.Topic<RosString> grabTopic = null;
     com.jilk.ros.Topic<GeoTwist> VelCmdTopic = null;
     RosState runstate = RosState.IDLE;
     String RemoteIP = null;
@@ -54,7 +55,7 @@ public class MainActivity extends AppCompatActivity {
         WebView webView = (WebView) findViewById(R.id.webView);
         webView.loadUrl("about:blank");
         MyImageView imageView = (MyImageView) findViewById(R.id.image_view);
-
+        imageView.mainActivity = this;
         Button btn_up = (Button) findViewById(R.id.btn_up);
         Button btn_down = (Button) findViewById(R.id.btn_down);
         Button btn_left = (Button) findViewById(R.id.btn_left);
@@ -73,6 +74,7 @@ public class MainActivity extends AppCompatActivity {
 //更多关于坐标转换的参考
                     ImageView imageView = findViewById(R.id.image_view);
                     Drawable drawable = imageView.getDrawable();
+
                     Rect imageBounds = drawable.getBounds();
 
 //初始化bitmap的宽高
@@ -114,10 +116,10 @@ public class MainActivity extends AppCompatActivity {
                         action == MotionEvent.ACTION_MASK ||
                         action == MotionEvent.ACTION_POINTER_DOWN ||
                         action == MotionEvent.ACTION_MOVE) {
-                    info.setText("action_down");
+
                     curbtn.setBackgroundColor(Color.parseColor("#0000CD"));
                 } else {
-                    info.setText("action_up");
+                    
                     curbtn.setBackgroundColor(Color.parseColor("#DDDDDD"));
                 }
                 // TODO Auto-generated method stub
@@ -176,7 +178,6 @@ public class MainActivity extends AppCompatActivity {
                                 }
                             }
                             robot_stop = false;
-                            info.setText("sent move message");
                         } else {
 
                             String MoveMsg = "{\"op\":\"publish\",\"topic\":\"/cmd_vel\",\"msg\":{\"linear\":{\"x\":" + 0 + ",\"y\":" +
@@ -190,7 +191,6 @@ public class MainActivity extends AppCompatActivity {
                                 client.send(MoveMsg);
                             }
                             robot_stop = true;
-                            info.setText("sent stop message");
                         }
                         return false;
                     } else {
@@ -235,7 +235,10 @@ public class MainActivity extends AppCompatActivity {
         switch (id) {
             case R.id.button_slam:
                 return RosState.SLAM;
-
+            case R.id.btn_nav:
+                return RosState.NAV;
+            case R.id.btn_grab:
+                return RosState.GRAB;
         }
         return null;
     }
@@ -243,6 +246,12 @@ public class MainActivity extends AppCompatActivity {
     int getButtonid(RosState s) {
         if (s == RosState.SLAM) {
             return R.id.button_slam;
+        }
+        if(s == RosState.NAV){
+            return R.id.btn_nav;
+        }
+        if(s == RosState.GRAB){
+            return R.id.btn_grab;
         }
         return 0;
     }
@@ -256,7 +265,6 @@ public class MainActivity extends AppCompatActivity {
                 0 + ",\"z\":0},\"angular\":{\"x\":0,\"y\":0,\"z\":" + 0 + "}}}";
         robot_stop = true;
         client.send(MoveMsg);
-        info.setText("sent stop msg ");
         int id = v.getId();
         RosString ctrlstring = new RosString("NULL");
         Button curbtn = (Button) findViewById(id);
@@ -265,8 +273,6 @@ public class MainActivity extends AppCompatActivity {
             if (runstate != RosState.IDLE) {
                 if (runstate == RosState.SLAM) {
                     ctrlstring = new RosString("stop slam");
-
-
                 }
                 if (runstate == RosState.HOLD) {
                     ctrlstring = new RosString("stop hold");
@@ -293,13 +299,13 @@ public class MainActivity extends AppCompatActivity {
 
                     WebView webView = (WebView) findViewById(R.id.webView);
                     webView.setVisibility(View.VISIBLE);
-                    webView.loadUrl("http://"+RemoteIP+":8080/stream?topic=/kinect2/qhd/color_image");
+                    webView.loadUrl("http://"+RemoteIP+":8080/stream?topic=/kinect2/qhd/image_color&bitrate=200000&type=vp8&qmin=0&qmax=10");
                     ctrlTopic.publish(ctrlstring);
                     runstate = RosState.SLAM;
 
                 }
                 if (id == R.id.btn_nav) {
-
+                    info.setText("btn_nav");
                     MyImageView imageview = (MyImageView) findViewById(R.id.image_view);
                     imageview.setVisibility(View.VISIBLE);
                     imageview.setImageURL("ftp://robot:6@" + RemoteIP + "/home/robot/map.png");
@@ -343,6 +349,9 @@ public class MainActivity extends AppCompatActivity {
                     webView.loadUrl("http://"+RemoteIP+":8080/stream?topic=/kinect2/qhd/color_image");
                     ctrlstring = new RosString("start grab");
                     ctrlTopic.publish(ctrlstring);
+                    Thread.sleep(5000);
+                    EditText et = (EditText)findViewById(R.id.grabtext);
+                    grabTopic.publish(new RosString("itemindex " + et.getText()));
                     runstate = RosState.GRAB;
                 }
                 curbtn.setBackgroundColor(Color.parseColor("#0000CD"));
@@ -369,6 +378,7 @@ public class MainActivity extends AppCompatActivity {
             info.setText("Connected");
             ctrlTopic = new com.jilk.ros.Topic<RosString>("/ctrlmsg", RosString.class, client);
             ctrlTopic.advertise();
+            grabTopic =  new com.jilk.ros.Topic<RosString>("/itemmsg", RosString.class, client);
             VelCmdTopic = new com.jilk.ros.Topic<GeoTwist>("/cmd_vel", GeoTwist.class, client);
             VelCmdTopic.advertise();
             if (sendzero == null) {
@@ -410,8 +420,8 @@ public class MainActivity extends AppCompatActivity {
                         imageView.setVisibility(View.GONE);
                         WebView webView = (WebView) findViewById(R.id.webView);
                         webView.setVisibility(View.VISIBLE);
-                        ctrlTopic.publish(new RosString("movebase "+originalImageOffsetX+" " + originalImageOffsetY));
-                        Toast.makeText(MainActivity.this, "movebase "+originalImageOffsetX+" " + originalImageOffsetY, Toast.LENGTH_SHORT).show();
+                        ctrlTopic.publish(new RosString("movebase "+originalImageOffsetX*0.05+" " + originalImageOffsetY*0.05));
+                        Toast.makeText(MainActivity.this, "movebase "+originalImageOffsetX*0.05+" " + originalImageOffsetY*0.05, Toast.LENGTH_SHORT).show();
                         return;
                     }
                 }

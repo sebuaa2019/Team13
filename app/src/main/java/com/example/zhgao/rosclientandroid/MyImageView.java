@@ -14,7 +14,7 @@ import java.net.URL;
 import java.net.URLConnection;
 
 public class MyImageView extends android.support.v7.widget.AppCompatImageView {
-
+    public MainActivity mainActivity;
     public static final int GET_DATA_SUCCESS = 1;
     public static final int NETWORK_ERROR = 2;
     public static final int SERVER_ERROR = 3;
@@ -78,6 +78,7 @@ public class MyImageView extends android.support.v7.widget.AppCompatImageView {
                         inputStream.close();
 
                 } catch (IOException e) {
+                    Toast.makeText(mainActivity, "started nav with last", Toast.LENGTH_SHORT).show();
                     e.printStackTrace();
                     //网络连接错误
                     handler.sendEmptyMessage(NETWORK_ERROR);
