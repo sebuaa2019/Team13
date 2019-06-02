@@ -779,6 +779,7 @@ void BehaviorCB(const std_msgs::String::ConstPtr &msg)
     }
 
 }
+sem_t callback_lock;
 void ItemCallback(const std_msgs::String::ConstPtr &msg){
 	sem_wait(&callback_lock);
 	int recv_index;
@@ -812,7 +813,7 @@ int main(int argc, char **argv)
     ros::Subscriber sub_sr = nh.subscribe("/wpb_home/behaviors", 30, BehaviorCB);
     ctrl_pub = nh.advertise<std_msgs::String>("/wpb_home/ctrl", 30);
     ros::Subscriber pose_diff_sub = nh.subscribe("/wpb_home/pose_diff", 1, PoseDiffCallback);
-	ros::Subscriber sub = n.subscribe("/itemmsg", 1000, ItemCallback);
+	ros::Subscriber sub = nh.subscribe("/itemmsg", 1000, ItemCallback);
     mani_ctrl_msg.name.resize(2);
     mani_ctrl_msg.position.resize(2);
     mani_ctrl_msg.velocity.resize(2);

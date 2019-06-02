@@ -120,6 +120,7 @@ void chatterCallback(const std_msgs::String::ConstPtr &msg) //是一个回调函
 		if(USE_YAML_SAVE)
 	    yaml_save::use_origin(MAP_FILE_NAME, "origin_origin");
 	    system("nohup roslaunch team_203 nav.launch &");
+		moveBaseClient = new MoveBaseClient("move_base",true);
 	    //moveBaseClient = MoveBaseClient("move_base", true);
 	    while (!moveBaseClient->waitForServer(ros::Duration(5.0)))
 	    {
@@ -133,6 +134,7 @@ void chatterCallback(const std_msgs::String::ConstPtr &msg) //是一个回调函
 	    yaml_save::use_origin(MAP_FILE_NAME, "last_origin");
 	    system("nohup roslaunch team_203 nav.launch &");
 	    //moveBaseClient = MoveBaseClient("move_base", true);
+		moveBaseClient =  new MoveBaseClient("move_base",true);
 	    while (!moveBaseClient->waitForServer(ros::Duration(5.0)))
 	    {
 		ROS_INFO("Waiting for the move_base action server to come up");
@@ -140,7 +142,12 @@ void chatterCallback(const std_msgs::String::ConstPtr &msg) //是一个回调函
 		CURSTATE = MAINSTATE_NAV;
 	}
 	if (msg->data == "start grab")
-	{
+	{	
+		system("rosnode kill kinect2");
+		system("rosnode kill kinect2_bridge");
+		system("rosnode kill kinect2_points_xyzrgb_sd");
+		system("rosnode kill wpb_home_grab_server_mod");
+		system("rosnode list");
 		system("nohup roslaunch team_203 grab_demo_mod.launch &");
 		CURSTATE = MAINSTATE_GRAB;
 	}
@@ -195,6 +202,7 @@ void chatterCallback(const std_msgs::String::ConstPtr &msg) //是一个回调函
 	    yaml_save::Vec3 v(x_map, y_map, yaw_map);
 	    yaml_save::add_last_origin(MAP_FILE_NAME, v);
 		}
+		delete moveBaseClient;
 	    system("rosnode kill rviz");
 	    system("rosnode kill map_server");
 	    system("rosnode kill rplidarNode");
@@ -277,7 +285,7 @@ int main(int argc, char **argv)
    * is the number of messages that will be buffered up before beginning to throw
    * away the oldest ones.
    */
-    moveBaseClient = new MoveBaseClient("move_base", true);
+   // moveBaseClient = new MoveBaseClient("move_base", true);
     ros::Subscriber sub = n.subscribe("/ctrlmsg", 1000, chatterCallback);
     ros::spin();
     /*
