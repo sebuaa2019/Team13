@@ -1,0 +1,19 @@
+#Internal package file, do not edit.
+#Thu May 23 22:05:04 CST 2019
+1.base=C\:\\Users\\yyf\\Desktop\\933\\RemoteControlAndroidROS-master\\HandControlLongBtn\\app\\build\\intermediates\\transforms\\stripDebugSymbol\\debug\\0
+2.path=lib/x86/libwebpbackport.so
+0.baseType=DIRECTORY
+3.baseType=DIRECTORY
+2.base=C\:\\Users\\yyf\\Desktop\\933\\RemoteControlAndroidROS-master\\HandControlLongBtn\\app\\build\\intermediates\\transforms\\stripDebugSymbol\\debug\\0
+3.set=DEX
+2.set=NATIVE_RESOURCE
+1.baseType=DIRECTORY
+3.path=classes.dex
+count=4
+1.set=NATIVE_RESOURCE
+0.path=lib/armeabi-v7a/libwebpbackport.so
+3.base=C\:\\Users\\yyf\\Desktop\\933\\RemoteControlAndroidROS-master\\HandControlLongBtn\\app\\build\\intermediates\\transforms\\dexMerger\\debug\\16
+0.set=NATIVE_RESOURCE
+0.base=C\:\\Users\\yyf\\Desktop\\933\\RemoteControlAndroidROS-master\\HandControlLongBtn\\app\\build\\intermediates\\transforms\\stripDebugSymbol\\debug\\0
+2.baseType=DIRECTORY
+1.path=lib/armeabi/libwebpbackport.so

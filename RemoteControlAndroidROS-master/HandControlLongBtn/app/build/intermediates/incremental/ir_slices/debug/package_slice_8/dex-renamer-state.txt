@@ -1,0 +1,4 @@
+#Thu May 23 21:59:38 CST 2019
+base.0=C\:\\Users\\yyf\\Desktop\\933\\RemoteControlAndroidROS-master\\HandControlLongBtn\\app\\build\\intermediates\\transforms\\dexMerger\\debug\\8
+path.0=classes.dex
+renamed.0=classes.dex
