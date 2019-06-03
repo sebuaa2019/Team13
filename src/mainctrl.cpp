@@ -185,6 +185,7 @@ void chatterCallback(const std_msgs::String::ConstPtr &msg) //是一个回调函
 	    system("rosnode kill teleop");
 	    system("rosnode kill rviz");
 	    system("rosnode kill rplidarNode");
+		system("convert /home/robot/map.pgm /home/robot/map.png");
 	    CURSTATE = MAINSTATE_IDLE;
 	    ros::Duration(1.0).sleep();
 	    ROS_INFO("stop slam");
@@ -217,6 +218,7 @@ void chatterCallback(const std_msgs::String::ConstPtr &msg) //是一个回调函
 	    int ret = sscanf(msg->data.c_str(), "movebase %f %f", &xmove, &ymove);
 	    if (ret == 2)
 	    {
+			ROS_INFO("x,y %f,%f",xmove,ymove);
 		move_base_msgs::MoveBaseGoal goal;
 		//we'll send a goal to the robot to move 1 meter forward
 		goal.target_pose.header.frame_id = "map";
@@ -226,6 +228,7 @@ void chatterCallback(const std_msgs::String::ConstPtr &msg) //是一个回调函
 		goal.target_pose.pose.orientation.w = 1.0;
 		ROS_INFO("Sending goal");
 		moveBaseClient->sendGoal(goal);
+		/*
 		moveBaseClient->waitForResult();
 
 		if (moveBaseClient->getState() == actionlib::SimpleClientGoalState::SUCCEEDED)
@@ -236,9 +239,10 @@ void chatterCallback(const std_msgs::String::ConstPtr &msg) //是一个回调函
 	    else
 	    {
 		ROS_INFO("invalid command in MAINSTATE_NAV %s", cstr_msg);
-	    }
+	    }*/
 	}
     }
+	}
 	else if(CURSTATE == MAINSTATE_GRAB){
 		if(msg->data == "stop grab"){
 			
