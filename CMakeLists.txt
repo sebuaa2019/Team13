@@ -1,20 +1,18 @@
 cmake_minimum_required(VERSION 2.8.3)
-project(Team_203)
+project(team_203)
 
-## Compile as C++11, supported in ROS Kinetic and newer
-# add_compile_options(-std=c++11)
+## Add support for C++11, supported in ROS Kinetic and newer
+# add_definitions(-std=c++11)
 
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
+
 find_package(catkin REQUIRED)
-
-## System dependencies are found with CMake's conventions
-# find_package(Boost REQUIRED COMPONENTS system)
-find_package(PCL REQUIRED)
-find_package(OpenCV REQUIRED)
-
 find_package(catkin REQUIRED COMPONENTS
+  roscpp
+  std_msgs
+  tf
   roscpp rospy std_msgs 
   pcl_conversions pcl_ros 
   cv_bridge image_transport tf 
@@ -22,6 +20,12 @@ find_package(catkin REQUIRED COMPONENTS
   image_geometry message_generation
   move_base_msgs actionlib 
 )
+find_package(PCL REQUIRED)
+find_package(OpenCV REQUIRED)
+
+## System dependencies are found with CMake's conventions
+# find_package(Boost REQUIRED COMPONENTS system)
+
 
 ## Uncomment this if the package has a setup.py. This macro ensures
 ## modules and global scripts declared therein get installed
@@ -104,13 +108,13 @@ generate_messages(
 ###################################
 ## The catkin_package macro generates cmake config files for your package
 ## Declare things to be passed to dependent projects
-## INCLUDE_DIRS: uncomment this if your package contains header files
+## INCLUDE_DIRS: uncomment this if you package contains header files
 ## LIBRARIES: libraries you create in this project that dependent projects also need
 ## CATKIN_DEPENDS: catkin_packages dependent projects also need
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
 #  INCLUDE_DIRS include
-#  LIBRARIES wpb_home_behaviors
+#  LIBRARIES team_203
  CATKIN_DEPENDS message_runtime
 #  DEPENDS system_lib
 )
@@ -121,17 +125,19 @@ catkin_package(
 
 ## Specify additional locations of header files
 ## Your package locations should be listed before other locations
+# include_directories(include)
 include_directories(
-  include ${catkin_INCLUDE_DIRS}
+  ${catkin_INCLUDE_DIRS}
     include
     ${catkin_INCLUDE_DIRS}
     ${PCL_INCLUDE_DIRS}
+  /home/robot/catkin_ws/src/team_203/include/
 )
-link_directories(${PCL_LIBRARY_DIRS})
 
+link_directories(${PCL_LIBRARY_DIRS})
 ## Declare a C++ library
 # add_library(${PROJECT_NAME}
-#   src/${PROJECT_NAME}/wpb_home_behaviors.cpp
+#   src/${PROJECT_NAME}/team_203.cpp
 # )
 
 ## Add cmake target dependencies of the library
@@ -142,7 +148,7 @@ link_directories(${PCL_LIBRARY_DIRS})
 ## Declare a C++ executable
 ## With catkin_make all packages are built within a single CMake context
 ## The recommended prefix ensures that target names across packages don't collide
-# add_executable(${PROJECT_NAME}_node src/wpb_home_behaviors_node.cpp)
+# add_executable(${PROJECT_NAME}_node src/team_203_node.cpp)
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
@@ -199,7 +205,7 @@ link_directories(${PCL_LIBRARY_DIRS})
 #############
 
 ## Add gtest based cpp test target and link libraries
-# catkin_add_gtest(${PROJECT_NAME}-test test/test_wpb_home_behaviors.cpp)
+# catkin_add_gtest(${PROJECT_NAME}-test test/test_team_203.cpp)
 # if(TARGET ${PROJECT_NAME}-test)
 #   target_link_libraries(${PROJECT_NAME}-test ${PROJECT_NAME})
 # endif()
@@ -207,32 +213,38 @@ link_directories(${PCL_LIBRARY_DIRS})
 ## Add folders to be run by python nosetests
 # catkin_add_nosetests(test)
 
-add_executable(wpb_home_grab_server
-  src/wpb_home_grab_server.cpp
+
+add_executable(mainctrl
+  src/mainctrl.cpp
 )
-add_dependencies(wpb_home_grab_server ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-target_link_libraries(wpb_home_grab_server
+add_dependencies(mainctrl ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+link_directories(
+  /usr/lib/
+)
+target_link_libraries(mainctrl
+  yaml-cpp
   ${catkin_LIBRARIES}
 )
 
-add_executable(wpb_home_pass_server
-  src/wpb_home_pass_server.cpp
+add_executable(wpb_home_grab_server_mod
+  src/wpb_home_grab_server_mod.cpp
 )
-add_dependencies(wpb_home_pass_server ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-target_link_libraries(wpb_home_pass_server
+add_dependencies(wpb_home_grab_server_mod ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(wpb_home_grab_server_mod
   ${catkin_LIBRARIES}
 )
-add_executable(wpb_home_grab_client
-  src/wpb_home_grab_client.cpp
+
+add_executable(wpb_home_pass_server_mod
+  src/wpb_home_pass_server_mod.cpp
 )
-add_dependencies(wpb_home_grab_client ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-target_link_libraries(wpb_home_grab_client
+add_dependencies(wpb_home_pass_server_mod ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(wpb_home_pass_server_mod
   ${catkin_LIBRARIES}
 )
-add_executable(EmergencyStop
-  src/EmergencyStop.cpp
+add_executable(wpb_home_grab_client_mod
+  src/wpb_home_grab_client_mod.cpp
 )
-add_dependencies(EmergencyStop ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-target_link_libraries(EmergencyStop
+add_dependencies(wpb_home_grab_client_mod ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(wpb_home_grab_client_mod
   ${catkin_LIBRARIES}
 )

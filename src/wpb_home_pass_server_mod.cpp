@@ -72,7 +72,7 @@ void BehaviorCB(const std_msgs::String::ConstPtr &msg)
 
 int main(int argc, char** argv)
 {
-    ros::init(argc, argv, "wpb_home_pass_server");
+    ros::init(argc, argv, "wpb_home_pass_server_mod");
 
     ros::NodeHandle n;
     ros::Subscriber sub_sr = n.subscribe("/wpb_home/behaviors", 30, BehaviorCB);
