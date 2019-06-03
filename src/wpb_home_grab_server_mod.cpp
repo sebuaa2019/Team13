@@ -64,6 +64,7 @@
 #include <std_msgs/String.h>
 #include <sound_play/SoundRequest.h>
 #include <geometry_msgs/Pose2D.h>
+#include <semaphore.h>
 #include "highgui.h"
 #include <stdlib.h>
 #include <stdio.h>
@@ -76,7 +77,6 @@ static float grab_y_offset = 0.0f;          //抓取前，对准物品，机器�
 static float grab_lift_offset = 0.0f;       //手臂抬起高度的补偿偏移量
 static float grab_forward_offset = 0.0f;    //手臂抬起后，机器人向前抓取物品移动的位移偏移量
 static float grab_gripper_value = 0.032;    //抓取物品时，手爪闭合后的手指间距
-static int itemIndex = -1;
 
 #define STEP_WAIT           0
 #define STEP_FIND_PLANE     1
@@ -158,8 +158,10 @@ static std::vector<stBoxMarker> vObj;
 static stBoxMarker boxLastObject;
 static int nObjDetectCounter = 0;
 
-bool poscmp(const stBoxMarker a, const stBoxMarker b){
-    return (a.yMax + a.yMin) < (b.yMax + b.yMin)
+static int itemIndex = -1;
+
+bool poscmp (const stBoxMarker a, const stBoxMarker b){
+    return(a.yMax + a.yMin) < (b.yMax + b.yMin);
 }
 
 void ProcCloudCB(const sensor_msgs::PointCloud2 &input)
@@ -383,7 +385,12 @@ void ProcCloudCB(const sensor_msgs::PointCloud2 &input)
                         if(nObjDetectCounter <= 3 || itemIndex < 0)
                         {
                             //第一帧记录最靠中间的物品
-                            itemIndex = 1
+                            while(true){
+								if(itemIndex >= 0){
+									break;
+								}
+								ros::Duration(1.0).sleep();
+							}
                             int nNumObj = vObj.size();
                             if(nNumObj > 0)
                             {
@@ -404,8 +411,8 @@ void ProcCloudCB(const sensor_msgs::PointCloud2 &input)
                             {
                                 ROS_WARN("[FIND_OBJ] nNumObj <= 0 ...");  //不会有效果
                             }
-                        }
-                        /*else
+                        }/*
+                        else
                         {
                             //后面的帧检测之前记录的物品还在不在
                             float fMidY = (boxLastObject.yMin + boxLastObject.yMax)/2;
@@ -531,7 +538,7 @@ void ProcCloudCB(const sensor_msgs::PointCloud2 &input)
         VelCmd(0,0,0);
         ctrl_msg.data = "pose_diff reset";
         ctrl_pub.publish(ctrl_msg);
-        if(nObjDetectCounter > 3 && itemIndex>= 0 && itemIndex < vObj.size);
+        if(nObjDetectCounter > 3 && itemIndex >= 0 && itemIndex < vObj.size())
         {
             nObjDetectCounter = 0;
             boxLastObject = vObj[itemIndex];
@@ -772,10 +779,18 @@ void BehaviorCB(const std_msgs::String::ConstPtr &msg)
     }
 
 }
-
+void ItemCallback(const std_msgs::String::ConstPtr &msg){
+	sem_wait(&callback_lock);
+	int recv_index;
+	int ret = sscanf(msg->data.c_str(),"itemindex %d",&recv_index);
+	if(ret == 1)
+		itemIndex = recv_index;
+	sem_post(&callback_lock);
+}
 int main(int argc, char **argv)
 {
-    ros::init(argc, argv, "wpb_home_grab_server");
+	sem_init(&callback_lock, 0, 1);
+    ros::init(argc, argv, "wpb_home_grab_server_mod");
     ROS_INFO("wpb_home_grab_server");
     tf_listener = new tf::TransformListener(); 
 
@@ -797,7 +812,7 @@ int main(int argc, char **argv)
     ros::Subscriber sub_sr = nh.subscribe("/wpb_home/behaviors", 30, BehaviorCB);
     ctrl_pub = nh.advertise<std_msgs::String>("/wpb_home/ctrl", 30);
     ros::Subscriber pose_diff_sub = nh.subscribe("/wpb_home/pose_diff", 1, PoseDiffCallback);
-
+	ros::Subscriber sub = n.subscribe("/itemmsg", 1000, ItemCallback);
     mani_ctrl_msg.name.resize(2);
     mani_ctrl_msg.position.resize(2);
     mani_ctrl_msg.velocity.resize(2);
@@ -811,7 +826,9 @@ int main(int argc, char **argv)
     nh_param.getParam("grab/grab_y_offset", grab_y_offset);
     nh_param.getParam("grab/grab_lift_offset", grab_lift_offset);
     nh_param.getParam("grab/grab_forward_offset", grab_forward_offset);
+    grab_forward_offset += 0.05;
     nh_param.getParam("grab/grab_gripper_value", grab_gripper_value);
+    grab_gripper_value += 0.005;
 
     bool bActive = false;
     nh_param.param<bool>("start", bActive, false);
