@@ -4,6 +4,7 @@ import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.graphics.Color;
+import android.graphics.Matrix;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
@@ -32,6 +33,8 @@ public class MainActivity extends AppCompatActivity {
     com.jilk.ros.Topic<RosString> ctrlTopic = null;
     com.jilk.ros.Topic<RosString> grabTopic = null;
     com.jilk.ros.Topic<GeoTwist> VelCmdTopic = null;
+    boolean waitForDest = false;
+    boolean SendZeroFlag = true;
     RosState runstate = RosState.IDLE;
     String RemoteIP = null;
     boolean connect_state = false;
@@ -40,7 +43,7 @@ public class MainActivity extends AppCompatActivity {
     float originalImageOffsetX;
     float originalImageOffsetY;
     boolean returnImageOffset = false;
-    Object imageRetLock;
+    Object imageRetLock = new Object();
 
     @SuppressLint("ClickableViewAccessibility")
     @Override
@@ -66,38 +69,39 @@ public class MainActivity extends AppCompatActivity {
         imageView.setOnTouchListener(new View.OnTouchListener() {
 
             @Override
-            public boolean onTouch(View v, MotionEvent event) {
+            public boolean onTouch(View v, MotionEvent e) {
+                if (waitForDest == false) {
+                    return true;
+                }
 //当按下时获取到屏幕中的xy位置
-                if (event.getAction() == MotionEvent.ACTION_DOWN) {
-                    Log.e("point", event.getX() + "," + event.getY());
+                ImageView imageView = (ImageView) findViewById(R.id.image_view);
+                int action = e.getAction();
+                if (
+                        action == MotionEvent.ACTION_DOWN) {
+                    // 获取触摸点的坐标 x, y
+                    float x = e.getX();
+                    float y = e.getY();
+                    // 目标点的坐标
+                    float dst[] = new float[2];
+                    // 获取到ImageView的matrix
+                    Matrix imageMatrix = imageView.getImageMatrix();
+                    // 创建一个逆矩阵
+                    Matrix inverseMatrix = new Matrix();
+                    // 求逆，逆矩阵被赋值
+                    imageMatrix.invert(inverseMatrix);
+                    // 通过逆矩阵映射得到目标点 dst 的值
+                    inverseMatrix.mapPoints(dst, new float[]{x, y});
+                    float dstX = dst[0];
+                    float dstY = dst[1];
 
-//更多关于坐标转换的参考
-                    ImageView imageView = findViewById(R.id.image_view);
-                    Drawable drawable = imageView.getDrawable();
-
-                    Rect imageBounds = drawable.getBounds();
-
-//初始化bitmap的宽高
-                    int intrinsicHeight = drawable.getIntrinsicHeight();
-                    int intrinsicWidth = drawable.getIntrinsicWidth();
-
-//可见image的宽高
-                    int scaledHeight = imageBounds.height();
-                    int scaledWidth = imageBounds.width();
-
-//使用fitXY
-                    float heightRatio = intrinsicHeight / scaledHeight;
-                    float widthRatio = intrinsicWidth / scaledWidth;
-
-//获取图像边界值
-                    float scaledImageOffsetX = event.getX() - imageBounds.left;
-                    float scaledImageOffsetY = event.getY() - imageBounds.top;
-
+                    // 判断dstX, dstY在Bitmap上的位置即可
+                    Toast.makeText(MainActivity.this, "dstX,dstY" + dstX + "," + dstY, Toast.LENGTH_SHORT).show();
 //根据你图像的缩放比例设置
                     synchronized (imageRetLock) {
                         returnImageOffset = true;
-                        originalImageOffsetX = scaledImageOffsetX * widthRatio;
-                        originalImageOffsetY = scaledImageOffsetY * heightRatio;
+
+                        originalImageOffsetX = dstX;
+                        originalImageOffsetY = dstY;
                     }
                 }
                 return true;
@@ -119,7 +123,7 @@ public class MainActivity extends AppCompatActivity {
 
                     curbtn.setBackgroundColor(Color.parseColor("#0000CD"));
                 } else {
-                    
+
                     curbtn.setBackgroundColor(Color.parseColor("#DDDDDD"));
                 }
                 // TODO Auto-generated method stub
@@ -247,10 +251,10 @@ public class MainActivity extends AppCompatActivity {
         if (s == RosState.SLAM) {
             return R.id.button_slam;
         }
-        if(s == RosState.NAV){
+        if (s == RosState.NAV) {
             return R.id.btn_nav;
         }
-        if(s == RosState.GRAB){
+        if (s == RosState.GRAB) {
             return R.id.btn_grab;
         }
         return 0;
@@ -279,13 +283,16 @@ public class MainActivity extends AppCompatActivity {
                 }
                 if (runstate == RosState.NAV) {
                     ctrlstring = new RosString("stop nav");
-
+                    SendZeroFlag = true;
+                    ImageView imageView = (ImageView) findViewById(R.id.image_view);
+                    imageView.setVisibility(View.GONE);
                 }
                 if (runstate == RosState.GRAB) {
                     ctrlstring = new RosString("stop grab");
+                    SendZeroFlag = true;
                 }
                 WebView webView = (WebView) findViewById(R.id.webView);
-                webView.setVisibility(View.GONE);
+                //webView.setVisibility(View.GONE);
                 ctrlTopic.publish(ctrlstring);
                 statebtn.setBackgroundColor(Color.parseColor("#FFEC8B"));
             }
@@ -299,7 +306,7 @@ public class MainActivity extends AppCompatActivity {
 
                     WebView webView = (WebView) findViewById(R.id.webView);
                     webView.setVisibility(View.VISIBLE);
-                    webView.loadUrl("http://"+RemoteIP+":8080/stream?topic=/kinect2/qhd/image_color&bitrate=200000&type=vp8&qmin=0&qmax=10");
+                    webView.loadUrl("http://" + RemoteIP + ":8080/stream?topic=/kinect2/qhd/image_color&bitrate=200000&type=vp8&qmin=0&qmax=10");
                     ctrlTopic.publish(ctrlstring);
                     runstate = RosState.SLAM;
 
@@ -308,7 +315,7 @@ public class MainActivity extends AppCompatActivity {
                     info.setText("btn_nav");
                     MyImageView imageview = (MyImageView) findViewById(R.id.image_view);
                     imageview.setVisibility(View.VISIBLE);
-                    imageview.setImageURL("ftp://robot:6@" + RemoteIP + "/home/robot/map.png");
+                    imageview.setImageURL("http://" + RemoteIP + ":4396/map.png");
                     AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
                     //    设置Title的图标
 
@@ -335,7 +342,10 @@ public class MainActivity extends AppCompatActivity {
                     //    显示出该对话框
                     builder.setCancelable(false);
                     builder.show();
-
+                    returnImageOffset = false;
+                    MapListener mapListener = new MapListener();
+                    mapListener.start();
+                    SendZeroFlag = false;
                     runstate = RosState.NAV;
                 }
                 if (id == R.id.btn_hold) {
@@ -344,15 +354,18 @@ public class MainActivity extends AppCompatActivity {
                     runstate = RosState.HOLD;
                 }
                 if (id == R.id.btn_grab) {
+                    SendZeroFlag = false;
                     WebView webView = (WebView) findViewById(R.id.webView);
                     webView.setVisibility(View.VISIBLE);
-                    webView.loadUrl("http://"+RemoteIP+":8080/stream?topic=/kinect2/qhd/color_image");
+                    webView.loadUrl("http://" + RemoteIP + ":8080/stream?topic=/kinect2/qhd/image_color&bitrate=200000&type=vp8&qmin=0&qmax=10");
                     ctrlstring = new RosString("start grab");
                     ctrlTopic.publish(ctrlstring);
                     Thread.sleep(5000);
-                    EditText et = (EditText)findViewById(R.id.grabtext);
+                    EditText et = (EditText) findViewById(R.id.grabtext);
                     grabTopic.publish(new RosString("itemindex " + et.getText()));
+                    Toast.makeText(MainActivity.this,"itemindex " + et.getText(),Toast.LENGTH_SHORT).show();
                     runstate = RosState.GRAB;
+
                 }
                 curbtn.setBackgroundColor(Color.parseColor("#0000CD"));
                 info.setText("successfully sent:" + ctrlstring.data);
@@ -378,7 +391,8 @@ public class MainActivity extends AppCompatActivity {
             info.setText("Connected");
             ctrlTopic = new com.jilk.ros.Topic<RosString>("/ctrlmsg", RosString.class, client);
             ctrlTopic.advertise();
-            grabTopic =  new com.jilk.ros.Topic<RosString>("/itemmsg", RosString.class, client);
+            grabTopic = new com.jilk.ros.Topic<RosString>("/itemmsg", RosString.class, client);
+            grabTopic.advertise();
             VelCmdTopic = new com.jilk.ros.Topic<GeoTwist>("/cmd_vel", GeoTwist.class, client);
             VelCmdTopic.advertise();
             if (sendzero == null) {
@@ -391,21 +405,23 @@ public class MainActivity extends AppCompatActivity {
     class SendZeroThread extends Thread {
         public void run() {
             while (true) {
-                try {
-                    if (client == null) {
-                        continue;
-                    }
-                    if (VelCmdTopic == null) {
-                        continue;
-                    }
-                    if (robot_stop) {
-                        String MoveMsg = "{\"op\":\"publish\",\"topic\":\"/cmd_vel\",\"msg\":{\"linear\":{\"x\":" + 0 + ",\"y\":" +
-                                0 + ",\"z\":0},\"angular\":{\"x\":0,\"y\":0,\"z\":" + 0 + "}}}";
-                        client.send(MoveMsg);
-                    }
-                    Thread.sleep(10);
-                } catch (Exception e) {
+                if(SendZeroFlag) {
+                    try {
+                        if (client == null) {
+                            continue;
+                        }
+                        if (VelCmdTopic == null) {
+                            continue;
+                        }
+                        if (robot_stop) {
+                            String MoveMsg = "{\"op\":\"publish\",\"topic\":\"/cmd_vel\",\"msg\":{\"linear\":{\"x\":" + 0 + ",\"y\":" +
+                                    0 + ",\"z\":0},\"angular\":{\"x\":0,\"y\":0,\"z\":" + 0 + "}}}";
+                            client.send(MoveMsg);
+                        }
+                        Thread.sleep(10);
+                    } catch (Exception e) {
 
+                    }
                 }
             }
         }
@@ -413,15 +429,18 @@ public class MainActivity extends AppCompatActivity {
 
     class MapListener extends Thread {
         public void run() {
+            waitForDest = true;
             while (true) {
                 synchronized (imageRetLock) {
                     if (returnImageOffset) {
-                        ImageView imageView = (ImageView) findViewById(R.id.image_view);
-                        imageView.setVisibility(View.GONE);
-                        WebView webView = (WebView) findViewById(R.id.webView);
-                        webView.setVisibility(View.VISIBLE);
-                        ctrlTopic.publish(new RosString("movebase "+originalImageOffsetX*0.05+" " + originalImageOffsetY*0.05));
-                        Toast.makeText(MainActivity.this, "movebase "+originalImageOffsetX*0.05+" " + originalImageOffsetY*0.05, Toast.LENGTH_SHORT).show();
+
+                        //WebView webView = (WebView) findViewById(R.id.webView);
+                        //webView.setVisibility(View.VISIBLE);
+                        //ctrlTopic.publish(new RosString("movebase 6 7"));
+                        ctrlTopic.publish(new RosString("movebase " + (originalImageOffsetX - 192) / 19.2 + " " + (192 - originalImageOffsetY) / 19.2));
+                        returnImageOffset = false;
+                        waitForDest = false;
+                        //Toast.makeText(MainActivity.this, "movebase "+originalImageOffsetX*0.05+" " + originalImageOffsetY*0.05, Toast.LENGTH_SHORT).show();
                         return;
                     }
                 }

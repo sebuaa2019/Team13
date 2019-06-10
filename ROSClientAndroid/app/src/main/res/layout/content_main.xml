@@ -155,11 +155,11 @@
 
     <com.example.zhgao.rosclientandroid.MyImageView
         android:id="@+id/image_view"
-        android:layout_width="340dp"
-        android:layout_height="211dp"
-        android:layout_x="10dp"
-        android:layout_y="121dp"
-        android:visibility="gone" />
+        android:layout_width="256dp"
+        android:layout_height="256dp"
+        android:layout_x="60dp"
+        android:layout_y="106dp"
+        android:visibility="visible" />
 
     <WebView
         android:id="@+id/webView"

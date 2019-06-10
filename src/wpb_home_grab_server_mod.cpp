@@ -386,6 +386,7 @@ void ProcCloudCB(const sensor_msgs::PointCloud2 &input)
                         {
                             //第一帧记录最靠中间的物品
                             while(true){
+                                ROS_INFO("waiting for index");
 								if(itemIndex >= 0){
 									break;
 								}
@@ -542,7 +543,8 @@ void ProcCloudCB(const sensor_msgs::PointCloud2 &input)
         {
             nObjDetectCounter = 0;
             boxLastObject = vObj[itemIndex];
-            itemIndex = -1;
+            ROS_WARN("itemIndex %d",itemIndex);
+            //itemIndex = -1;
             // 目标物品的坐标
             fObjGrabX = boxLastObject.xMin;
             fObjGrabY = (boxLastObject.yMin+boxLastObject.yMax)/2;
@@ -636,9 +638,15 @@ void ProcCloudCB(const sensor_msgs::PointCloud2 &input)
         }
     }
     
-    //10、抓取任务完毕
+    //10、抓取任务完毕mani_ctrl_pub.publish(mani_ctrl_msg);
     if(nStep == STEP_DONE)
     {
+        if(nTimeDelayCounter <10){
+         //mani_ctrl_msg.position[0] = 0;
+          mani_ctrl_msg.position[1] =1;
+          mani_ctrl_pub.publish(mani_ctrl_msg);
+        }
+        nTimeDelayCounter++;
         result_msg.data = "done";
         result_pub.publish(result_msg);
     }
@@ -779,6 +787,7 @@ void BehaviorCB(const std_msgs::String::ConstPtr &msg)
     }
 
 }
+sem_t callback_lock;
 void ItemCallback(const std_msgs::String::ConstPtr &msg){
 	sem_wait(&callback_lock);
 	int recv_index;
@@ -812,7 +821,7 @@ int main(int argc, char **argv)
     ros::Subscriber sub_sr = nh.subscribe("/wpb_home/behaviors", 30, BehaviorCB);
     ctrl_pub = nh.advertise<std_msgs::String>("/wpb_home/ctrl", 30);
     ros::Subscriber pose_diff_sub = nh.subscribe("/wpb_home/pose_diff", 1, PoseDiffCallback);
-	ros::Subscriber sub = n.subscribe("/itemmsg", 1000, ItemCallback);
+	ros::Subscriber sub = nh.subscribe("/itemmsg", 1000, ItemCallback);
     mani_ctrl_msg.name.resize(2);
     mani_ctrl_msg.position.resize(2);
     mani_ctrl_msg.velocity.resize(2);
@@ -929,6 +938,7 @@ int main(int argc, char **argv)
                 ctrl_msg.data = "pose_diff reset";
                 ctrl_pub.publish(ctrl_msg);
                 nStep = STEP_DONE;
+                nTimeDelayCounter = 0;
             }
 
             result_msg.data = "backward";

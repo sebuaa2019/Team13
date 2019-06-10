@@ -120,6 +120,7 @@ void chatterCallback(const std_msgs::String::ConstPtr &msg) //是一个回调函
 		if(USE_YAML_SAVE)
 	    yaml_save::use_origin(MAP_FILE_NAME, "origin_origin");
 	    system("nohup roslaunch team_203 nav.launch &");
+		moveBaseClient = new MoveBaseClient("move_base",true);
 	    //moveBaseClient = MoveBaseClient("move_base", true);
 	    while (!moveBaseClient->waitForServer(ros::Duration(5.0)))
 	    {
@@ -133,6 +134,7 @@ void chatterCallback(const std_msgs::String::ConstPtr &msg) //是一个回调函
 	    yaml_save::use_origin(MAP_FILE_NAME, "last_origin");
 	    system("nohup roslaunch team_203 nav.launch &");
 	    //moveBaseClient = MoveBaseClient("move_base", true);
+		moveBaseClient =  new MoveBaseClient("move_base",true);
 	    while (!moveBaseClient->waitForServer(ros::Duration(5.0)))
 	    {
 		ROS_INFO("Waiting for the move_base action server to come up");
@@ -140,7 +142,12 @@ void chatterCallback(const std_msgs::String::ConstPtr &msg) //是一个回调函
 		CURSTATE = MAINSTATE_NAV;
 	}
 	if (msg->data == "start grab")
-	{
+	{	
+		system("rosnode kill kinect2");
+		system("rosnode kill kinect2_bridge");
+		system("rosnode kill kinect2_points_xyzrgb_sd");
+		system("rosnode kill wpb_home_grab_server_mod");
+		system("rosnode list");
 		system("nohup roslaunch team_203 grab_demo_mod.launch &");
 		CURSTATE = MAINSTATE_GRAB;
 	}
@@ -178,6 +185,7 @@ void chatterCallback(const std_msgs::String::ConstPtr &msg) //是一个回调函
 	    system("rosnode kill teleop");
 	    system("rosnode kill rviz");
 	    system("rosnode kill rplidarNode");
+		system("convert /home/robot/map.pgm /home/robot/map.png");
 	    CURSTATE = MAINSTATE_IDLE;
 	    ros::Duration(1.0).sleep();
 	    ROS_INFO("stop slam");
@@ -195,8 +203,9 @@ void chatterCallback(const std_msgs::String::ConstPtr &msg) //是一个回调函
 	    yaml_save::Vec3 v(x_map, y_map, yaw_map);
 	    yaml_save::add_last_origin(MAP_FILE_NAME, v);
 		}
+		delete moveBaseClient;
 	    system("rosnode kill rviz");
-	    system("rosnode kill map_server");
+//	    system("rosnode kill map_server");
 	    system("rosnode kill rplidarNode");
 	    system("rosnode kill move_base");
 	    system("rosnode kill amcl");
@@ -209,6 +218,7 @@ void chatterCallback(const std_msgs::String::ConstPtr &msg) //是一个回调函
 	    int ret = sscanf(msg->data.c_str(), "movebase %f %f", &xmove, &ymove);
 	    if (ret == 2)
 	    {
+			ROS_INFO("x,y %f,%f",xmove,ymove);
 		move_base_msgs::MoveBaseGoal goal;
 		//we'll send a goal to the robot to move 1 meter forward
 		goal.target_pose.header.frame_id = "map";
@@ -218,6 +228,7 @@ void chatterCallback(const std_msgs::String::ConstPtr &msg) //是一个回调函
 		goal.target_pose.pose.orientation.w = 1.0;
 		ROS_INFO("Sending goal");
 		moveBaseClient->sendGoal(goal);
+		/*
 		moveBaseClient->waitForResult();
 
 		if (moveBaseClient->getState() == actionlib::SimpleClientGoalState::SUCCEEDED)
@@ -228,12 +239,18 @@ void chatterCallback(const std_msgs::String::ConstPtr &msg) //是一个回调函
 	    else
 	    {
 		ROS_INFO("invalid command in MAINSTATE_NAV %s", cstr_msg);
-	    }
+	    }*/
 	}
     }
+	}
 	else if(CURSTATE == MAINSTATE_GRAB){
 		if(msg->data == "stop grab"){
-			
+			system("rosnode kill wpb_home_core");
+			system("rosnode kill wpb_home_grab_server_mod");
+			system("rosnode kill rviz");
+			system("rosnode kill wpb_home_main_ctrl_mod");
+			system("rosnode kill robot_state_publisher");
+			CURSTATE = MAINSTATE_IDLE;
 		}
 	}
     sem_post(&callback_lock);
@@ -277,7 +294,7 @@ int main(int argc, char **argv)
    * is the number of messages that will be buffered up before beginning to throw
    * away the oldest ones.
    */
-    moveBaseClient = new MoveBaseClient("move_base", true);
+   // moveBaseClient = new MoveBaseClient("move_base", true);
     ros::Subscriber sub = n.subscribe("/ctrlmsg", 1000, chatterCallback);
     ros::spin();
     /*
