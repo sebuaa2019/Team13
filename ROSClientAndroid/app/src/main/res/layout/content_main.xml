@@ -1,0 +1,172 @@
+<?xml version="1.0" encoding="utf-8"?>
+<AbsoluteLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    app:layout_behavior="@string/appbar_scrolling_view_behavior"
+    tools:context=".MainActivity"
+    tools:showIn="@layout/activity_main">
+
+    <TextView
+        android:id="@+id/t1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Hello World!"
+        android:layout_x ="155dp"
+        android:layout_y ="479dp" />
+
+    <Button
+        android:id="@+id/button_slam"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="262dp"
+        android:layout_x="88dp"
+        android:layout_y="55dp"
+        android:onClick="onClick"
+        android:text="SLAM" />
+
+
+    <EditText
+    android:id="@+id/addresstext"
+    android:layout_width="195dp"
+    android:layout_height="46dp"
+    android:layout_x="81dp"
+    android:layout_y="5dp"
+    android:ems="10"
+    android:inputType="text"
+    android:text="192.168.1.100"
+
+    />
+
+    <EditText
+        android:id="@+id/grabtext"
+        android:layout_width="36dp"
+        android:layout_height="wrap_content"
+        android:layout_x="317dp"
+        android:layout_y="406dp"
+        android:ems="10"
+        android:inputType="text"
+        android:text="0"
+
+        />
+
+    <TextView
+        android:id="@+id/textView_addr"
+        android:layout_width="101dp"
+        android:layout_height="wrap_content"
+
+        android:layout_x="6dp"
+        android:layout_y="16dp"
+        android:text="Address"
+        android:textSize="18sp" />
+
+    <Button
+        android:id="@+id/btn_connect"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_x="271dp"
+        android:layout_y="1dp"
+        android:onClick="onClickConnect"
+        android:text="Connect" />
+
+    <Button
+        android:id="@+id/btn_up"
+        style="@style/Widget.AppCompat.Button"
+        android:layout_width="47dp"
+        android:layout_height="47dp"
+
+        android:layout_x="49dp"
+        android:layout_y="369dp" />
+
+    <Button
+        android:id="@+id/btn_right"
+        style="@style/Widget.AppCompat.Button"
+        android:layout_width="47dp"
+        android:layout_height="47dp"
+        android:layout_x="96dp"
+        android:layout_y="416dp" />
+
+    <Button
+        android:id="@+id/btn_counterwise"
+        style="@style/Widget.AppCompat.Button"
+        android:layout_width="47dp"
+        android:layout_height="47dp"
+
+        android:layout_x="162dp"
+        android:layout_y="416dp" />
+
+    <Button
+        android:id="@+id/btn_clockwise"
+        style="@style/Widget.AppCompat.Button"
+        android:layout_width="47dp"
+        android:layout_height="47dp"
+
+        android:layout_x="212dp"
+        android:layout_y="416dp" />
+
+    <Button
+        android:id="@+id/btn_down"
+        style="@style/Widget.AppCompat.Button"
+        android:layout_width="47dp"
+        android:layout_height="47dp"
+        android:layout_x="49dp"
+        android:layout_y="463dp" />
+
+    <Button
+        android:id="@+id/btn_left"
+        style="@style/Widget.AppCompat.Button"
+        android:layout_width="47dp"
+        android:layout_height="47dp"
+        android:layout_x="2dp"
+        android:layout_y="416dp" />
+
+    <Button
+        android:id="@+id/btn_nav"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_x="176dp"
+        android:layout_y="55dp"
+        android:onClick="onClick"
+        android:text="NAV"
+        tools:layout_editor_absoluteX="124dp"
+        tools:layout_editor_absoluteY="59dp" />
+
+    <Button
+        android:id="@+id/btn_hold"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_x="0dp"
+        android:layout_y="55dp"
+        android:text="HOLD"
+        tools:layout_editor_absoluteX="35dp"
+        tools:layout_editor_absoluteY="56dp" />
+
+    <Button
+        android:id="@+id/btn_grab"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_x="264dp"
+        android:layout_y="55dp"
+        android:onClick="onClick"
+        android:text="GRAB"
+        tools:layout_editor_absoluteX="264dp"
+        tools:layout_editor_absoluteY="53dp" />
+
+    <com.example.zhgao.rosclientandroid.MyImageView
+        android:id="@+id/image_view"
+        android:layout_width="340dp"
+        android:layout_height="211dp"
+        android:layout_x="10dp"
+        android:layout_y="121dp"
+        android:visibility="gone" />
+
+    <WebView
+        android:id="@+id/webView"
+        android:layout_width="340dp"
+        android:layout_height="211dp"
+        android:layout_x="10dp"
+        android:layout_y="121dp"
+        android:visibility="gone" />
+
+</AbsoluteLayout>
